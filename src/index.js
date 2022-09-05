@@ -7,18 +7,33 @@ const fileName = "data.json";
 
 const filePath = path.join(process.cwd(), "./.data", fileName);
 
-fs.stat(filePath, (err, stats) => {
-  if (err) {
-    console.error(err);
-    return;
+// write file with fileDescriptor in callback style
+
+/**
+r+ open the file for reading and writing, if file doesn't exist it won't be
+created.
+
+w+ open the file for reading and writing, positioning the stream at the
+beginning of the file. The file is created if not existing.
+
+a open the file for writing, positioning the stream at the end of the file.
+The file is created if not existing.
+
+a+ open the file for reading and writing, positioning the stream at the
+end of the file. The file is created if not existing. 
+ */
+
+fs.open(filePath, "a", (error, fileDescriptor) => {
+  if (!error && fileDescriptor) {
+    const data = "hello";
+    fs.writeFile(fileDescriptor, data, (error) => {
+      if (!error) {
+        fs.close(fileDescriptor, (error) => {
+          console.error({ error });
+        });
+      }
+    });
+  } else {
+    console.error({ error });
   }
-
-  const status = {
-    isFile: stats.isFile(), // true
-    isDirectory: stats.isDirectory(), // false
-    isSymbolicLink: stats.isSymbolicLink(), // false
-    size: stats.size, // 1024000 //= 1MB
-  };
-
-  console.log({ status });
 });
